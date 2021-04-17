@@ -58,9 +58,6 @@ const validateQuery = (request, response, next) => {
   } else if (status && !statusValues.includes(status)) {
     response.status(400);
     response.send("Invalid Todo Status");
-  } else if (date && !isDateValid) {
-    response.status(400);
-    response.send("Invalid Due Date");
   } else {
     next();
   }
@@ -121,29 +118,70 @@ app.get("/todos/:todoId", validateQuery, async (request, response) => {
   response.send(convertTodoDbObjectToResponseObject(todo));
 });
 
+// app.get("/agenda/", async (request, response) => {
+//   try {
+//     const { date } = request.query;
+//     let there = dateFns.format(new Date(date), "yyyy-MM-dd");
+//     const getQuery = `SELECT * FROM todo
+//     WHERE due_date = '${there}';`;
+//     console.log(getQuery);
+//     const data = await database.all(getQuery);
+//     response.send(
+//       data.map((eachmap) => ({
+//         id: eachmap.id,
+//         todo: eachmap.todo,
+//         priority: eachmap.priority,
+//         category: eachmap.category,
+//         status: eachmap.status,
+//         dueDate: eachmap.due_date,
+//       }))
+//     );
+//   } catch (e) {
+//     response.status(400);
+//     response.send("Invalid Due Date");
+//   }
+// });
+
 app.get("/agenda/", validateQuery, async (request, response) => {
   const { date } = request.query;
-  const getTodosQuery = `
-    SELECT
-      *
-    FROM
-      todo
-    WHERE 
-      due_date = '${date}';
-    `;
-  const todosArray = await database.all(getTodosQuery);
-  response.send(
-    todosArray.map((eachTodo) => convertTodoDbObjectToResponseObject(eachTodo))
+  const [year, month, day] = date.split("-");
+  const formattedDate = dateFns.format(
+    new Date(year, month - 1, day),
+    "yyyy-MM-dd"
   );
+  console.log(date);
+  console.log(formattedDate);
+  const isDateValid = date === formattedDate;
+  if (isDateValid) {
+    const getTodosQuery = `
+        SELECT
+          *
+        FROM
+          todo
+        WHERE
+          due_date = '${date}';
+        `;
+    const todosArray = await database.all(getTodosQuery);
+    response.send(
+      todosArray.map((eachTodo) =>
+        convertTodoDbObjectToResponseObject(eachTodo)
+      )
+    );
+  } else {
+    response.status(400);
+    response.send("Invalid Due Date");
+  }
 });
 
 app.post("/todos/", validateBody, async (request, response) => {
   const { id, todo, priority, status, category, dueDate } = request.body;
+  let date = dateFns.format(new Date(dueDate), "yyyy-MM-dd");
   const addTodoQuery = `
-    INSERT INTO todo VALUES 
-    (${id}, '${todo}', '${priority}', '${status}', '${category}', '${dueDate}');
+    INSERT INTO todo (id, todo, priority, status, category, due_date) VALUES 
+    (${id}, '${todo}', '${priority}', '${status}', '${category}', '${date}');
     `;
-  await database.run(addTodoQuery);
+  const dbResponse = await database.run(addTodoQuery);
+  console.log(dbResponse);
   response.send("Todo Successfully Added");
 });
 

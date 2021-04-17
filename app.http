@@ -2,7 +2,7 @@ POST http://localhost:3000/todos/
 Content-Type: application/json
 
 {
-  "id": 8,
+  "id": 10,
   "todo": "Finalize event theme",
   "priority": "LOW",
   "status": "TO DO",
@@ -32,7 +32,7 @@ GET http://localhost:3000/todos/?category=WORK&status=DONE
 GET http://localhost:3000/todos/2
 ###
 
-GET http://localhost:3000/agenda/?date=2021-02-225
+GET http://localhost:3000/agenda/?date=2021-02-22
 ###
 
 DELETE http://localhost:3000/todos/6
