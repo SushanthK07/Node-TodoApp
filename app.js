@@ -30,8 +30,6 @@ const initializeDbAndServer = async () => {
 
 initializeDbAndServer();
 
-// dateFns.format(new Date(2014, 1, 11), 'yyyy-MM-dd')
-
 const convertTodoDbObjectToResponseObject = (dbObject) => {
   return {
     id: dbObject.id,
@@ -117,30 +115,6 @@ app.get("/todos/:todoId", validateQuery, async (request, response) => {
   const todo = await database.get(getTodoQuery);
   response.send(convertTodoDbObjectToResponseObject(todo));
 });
-
-// app.get("/agenda/", async (request, response) => {
-//   try {
-//     const { date } = request.query;
-//     let there = dateFns.format(new Date(date), "yyyy-MM-dd");
-//     const getQuery = `SELECT * FROM todo
-//     WHERE due_date = '${there}';`;
-//     console.log(getQuery);
-//     const data = await database.all(getQuery);
-//     response.send(
-//       data.map((eachmap) => ({
-//         id: eachmap.id,
-//         todo: eachmap.todo,
-//         priority: eachmap.priority,
-//         category: eachmap.category,
-//         status: eachmap.status,
-//         dueDate: eachmap.due_date,
-//       }))
-//     );
-//   } catch (e) {
-//     response.status(400);
-//     response.send("Invalid Due Date");
-//   }
-// });
 
 app.get("/agenda/", validateQuery, async (request, response) => {
   const { date } = request.query;
